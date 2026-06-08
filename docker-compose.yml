@@ -1,0 +1,58 @@
+services:
+  # --- Service 1: Cơ sở dữ liệu MySQL ---
+  mysqldb:
+    image: mysql:8.0
+    restart: unless-stopped
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # Dùng lệnh quét cổng TCP nội bộ siêu nhanh, không phụ thuộc vào mật khẩu root
+    healthcheck:
+      test: ["CMD-SHELL", "cat < /dev/null > /dev/tcp/127.0.0.1/3306"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  # --- Service 2: Ứng dụng Spring Boot Java ---
+  java-app:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM maven:3.9-eclipse-temurin-21
+        WORKDIR /app
+    restart: unless-stopped    
+    container_name: my-java-app-container
+    working_dir: /app
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+      - "5005:5005" # Cổng kết nối Debug từ VS Code vào ứng dụng
+    environment:
+      DB_URL: "jdbc:mysql://mysqldb:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+      DB_USERNAME: "root"
+      DB_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      SMTP_USER: "${SMTP_USER}"
+      SMTP_PASS: "${SMTP_PASS}"
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+    volumes:
+      - .:/app
+      # Độc lập thư mục target nội bộ container để tránh nghẽn I/O trên Windows/VirtualBox Shared Folder
+      - /app/target/
+      - /app/.mvn/
+      # Cache thư viện Maven từ máy vật lý vào container
+      - ~/.m2:/root/.m2
+    # 🌟 Truyền tham số RAM và Debug trực tiếp vào jvmArguments của plugin Spring Boot
+    command: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Xms512m -Xmx1024m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    # Tự động khởi động lại container khi file cấu hình pom.xml thay đổi
+    develop:
+      watch:
+        - action: rebuild
+          path: ./pom.xml
+volumes:
+  mysql_data:

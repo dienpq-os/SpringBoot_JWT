@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập Hệ thống</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-container { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 350px; }
+        h2 { text-align: center; margin-bottom: 20px; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #666; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #007bff; border: none; color: white; font-size: 16px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .error-msg { color: red; font-size: 14px; text-align: center; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <h2>ĐĂNG NHẬP</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="username">Tên đăng nhập</label>
+            <input type="text" id="username" required placeholder="Nhập username...">
+        </div>
+        <div class="form-group">
+            <label for="password">Mật khẩu</label>
+            <input type="password" id="password" required placeholder="Nhập mật khẩu...">
+        </div>
+        <button type="submit">Đăng nhập</button>
+        <div id="errorBox" class="error-msg"></div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Chặn hành vi load lại trang mặc định của form
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorBox = document.getElementById('errorBox');
+        
+        errorBox.style.display = 'none';
+
+        try {
+            // Gọi API đến AuthController của bạn
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                // 1. Lưu JWT Token vào bộ nhớ trình duyệt
+                localStorage.setItem('accessToken', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('role', data.role);
+                
+                alert('Đăng nhập thành công!');
+                // 2. Điều hướng sang trang chủ hoặc trang quản trị
+                window.location.href = '/dashboard.html'; 
+            } else {
+                const errorText = await response.text();
+                errorBox.innerText = errorText || 'Tài khoản hoặc mật khẩu không đúng!';
+                errorBox.style.display = 'block';
+            }
+        } catch (error) {
+            errorBox.innerText = 'Không thể kết nối đến máy chủ!';
+            errorBox.style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>

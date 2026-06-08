@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="LOG_PATH" value="./logs" />
+
+    <!-- 1A. CONSOLE HỆ THỐNG: Hiển thị log Spring, Hibernate trên Terminal -->
+    <appender name="STDOUT_SYSTEM" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 1B. CONSOLE NGHIỆP VỤ (MỚI): Chỉ hiển thị log của User trên Terminal -->
+    <appender name="STDOUT_BUSINESS" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 2. LOG TỔNG NGHIỆP VỤ: Chỉ lưu hành động của người dùng vào file -->
+    <appender name="ALL_USERS_ACTIVITY" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/all_users_activity.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/history/all_users.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%X{userId}] %-5level - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 3. LOG HỆ THỐNG: Ghi lại log khởi động Spring, SQL Hibernate... -->
+    <appender name="SYSTEM_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/system.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/history/system.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>20MB</maxFileSize>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- LOGGER NGHIỆP VỤ CỦA USER -->
+    <!-- Sử dụng STDOUT_BUSINESS độc lập để không dính líu gì tới luồng của SYSTEM_LOG -->
+    <logger name="UserBusinessLogger" level="INFO" additivity="false">
+        <appender-ref ref="ALL_USERS_ACTIVITY" />
+        <appender-ref ref="STDOUT_BUSINESS" /> 
+    </logger>
+    
+    <!-- ROOT MẶC ĐỊNH: Chỉ quản lý log hệ thống và Console hệ thống -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT_SYSTEM" />
+        <appender-ref ref="SYSTEM_LOG" />
+    </root>
+</configuration>
