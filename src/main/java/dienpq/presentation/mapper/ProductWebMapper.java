@@ -36,8 +36,7 @@ public interface ProductWebMapper {
     // 5. Chuyển từ Lõi Domain ngược ra Form Giao diện
     ProductRequest toRequest(Product product);
 
-    // 6. Chỉ định rõ ràng thuộc tính mục tiêu là "isMain"
-    // (khớp với tên biến DTO)
+    // 6. Chỉ định rõ ràng thuộc tính mục tiêu là "isMain" (khớp với tên biến DTO)
     // và lấy nguồn từ phương thức "isMain" của thực thể Domain ProductImage
     @Mapping(target = "isMain", source = "main")
     ProductResponse.ProductImageResponse toImageResponse(ProductImage productImage);

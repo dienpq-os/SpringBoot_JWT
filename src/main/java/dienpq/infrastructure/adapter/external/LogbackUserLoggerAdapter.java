@@ -24,8 +24,8 @@ public class LogbackUserLoggerAdapter implements UserLoggerPort {
     // Quản lý danh sách các file log cá nhân đang mở
     private final ConcurrentHashMap<String, LoggerContainer> userLoggers = new ConcurrentHashMap<>();
 
-    // Tự động giải phóng file log cá nhân trong RAM nếu User không thao tác sau 30
-    // phút
+    // Tự động giải phóng file log cá nhân trong RAM
+    // nếu User không thao tác sau 30 phút
     private static final long IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 
     @Override
@@ -34,8 +34,8 @@ public class LogbackUserLoggerAdapter implements UserLoggerPort {
                 ? "system"
                 : userId;
 
-        // 1. Ghi vào file log tổng nghiệp vụ (all_users_activity.log) thông qua XML
-        // công nghệ
+        // 1. Ghi vào file log tổng nghiệp vụ (all_users_activity.log)
+        // thông qua công nghệ XML
         try {
             MDC.put("userId", logUser);
             businessLogger.info(message);
@@ -43,8 +43,8 @@ public class LogbackUserLoggerAdapter implements UserLoggerPort {
             MDC.remove("userId");
         }
 
-        // Nếu là tác vụ hệ thống thông thường, dừng lại (không tạo file riêng lẻ
-        // user_system.log)
+        // Nếu là tác vụ hệ thống thông thường,
+        // dừng lại (không tạo file riêng lẻ user_system.log)
         if ("system".equals(logUser)) {
             return;
         }
@@ -52,8 +52,8 @@ public class LogbackUserLoggerAdapter implements UserLoggerPort {
         // Dọn dẹp các luồng log cũ đã treo lâu trong bộ nhớ để bảo vệ RAM
         evictIdleLoggers();
 
-        // 2. Ghi vào file log cá nhân riêng biệt (user_[userId].log) sinh bằng Java thủ
-        // công
+        // 2. Ghi vào file log cá nhân riêng biệt (user_[userId].log)
+        // sinh bằng Java thủ công
         LoggerContainer container = userLoggers.computeIfAbsent(logUser, this::createLoggerForUser);
         container.updateLastAccessed();
         container.getLogger().info(message);

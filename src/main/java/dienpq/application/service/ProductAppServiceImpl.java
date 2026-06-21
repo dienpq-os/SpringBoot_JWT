@@ -10,6 +10,7 @@ import dienpq.domain.port.external.TransactionManagerPort;
 import dienpq.domain.port.external.UserLoggerPort;
 import dienpq.domain.port.repository.ProductRepositoryPort;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class ProductAppServiceImpl implements ProductAppService {
     }
 
     @Override
-    public double getInventoryValue() {
+    public BigDecimal getInventoryValue() {
         return productRepositoryPort.sumTotalInventoryValue();
     }
 

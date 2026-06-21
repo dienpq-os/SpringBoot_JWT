@@ -35,7 +35,7 @@ public class ProductEntity {
     private int soLuong;
 
     @BatchSize(size = 10) // Tối ưu: Lấy ảnh theo lô để tránh load chậm (N+1 Query)
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @ToString.Exclude // Tối ưu: Tránh vòng lặp vô hạn khi in Log (nếu dùng @Data)
     @Builder.Default // Đảm bảo khởi tạo mặc định để tránh NullPointerException khi thêm ảnh mới
     private List<ProductImageEntity> images = new ArrayList<>();

@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.Sort;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,12 +64,10 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
         Pageable pageable = PageRequest.of(page, size, Sort.by("maSP").ascending());
 
         Page<ProductEntity> entitiesPage;
-        // ĐÃ SỬA: Thay đổi phương thức gọi từ hàm sinh tự động (Query Method) sang hàm
-        // tự viết (searchByKeyword) để kích hoạt countQuery
         if (keyword == null || keyword.trim().isEmpty()) {
             entitiesPage = jpaProductsRepository.findAll(pageable);
         } else {
-            // Hàm này bây giờ sẽ chạy phân trang chuẩn 100% dưới DB, không lo sập RAM
+            // Hàm này sẽ chạy phân trang dưới DB, không lo sập RAM
             entitiesPage = jpaProductsRepository.searchByKeyword(keyword.trim(), pageable);
         }
 
@@ -84,9 +83,9 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     }
 
     @Override
-    public Double sumTotalInventoryValue() {
-        Double totalValue = jpaProductsRepository.sumTotalInventoryValue();
-        return totalValue != null ? totalValue : 0.0;
+    public BigDecimal sumTotalInventoryValue() {
+        BigDecimal totalValue = jpaProductsRepository.sumTotalInventoryValue();
+        return totalValue != null ? totalValue : BigDecimal.ZERO;
     }
 
     @Override
@@ -113,13 +112,19 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     }
 
     @Override
+    public List<Product> findBySoLuongBetween(Integer start, Integer end) {
+        List<ProductEntity> entities = jpaProductsRepository.findBySoLuongBetween(start, end);
+        return entities.stream()
+                .map(productMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Map<String, Long> getCountByBrand() {
-        // ĐÃ SỬA: Nhận về danh sách kiểu BrandCountProjection (Interface) thay vì
-        // Object[] thô sơ
+        // Nhận về danh sách kiểu BrandCountProjection (Interface)
+        // thay vì Object[] thô sơ
         List<BrandCountProjection> results = jpaProductsRepository.countProductsByBrand();
 
-        // ĐÃ TỐI ƯU: Không còn dùng mảng result[0], result[1] và không cần ép kiểu thủ
-        // công bằng từ khóa instanceof nữa
         return results.stream()
                 .filter(p -> p.getBrand() != null && !p.getBrand().isBlank())
                 .collect(Collectors.toMap(

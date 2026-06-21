@@ -6,9 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import dienpq.application.service.MyBean;
 import dienpq.domain.port.external.JsonSerializerPort;
 import dienpq.infrastructure.adapter.external.JacksonSerializerAdapter;

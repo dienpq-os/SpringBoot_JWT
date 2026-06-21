@@ -5,6 +5,7 @@ import dienpq.domain.model.Product;
 import dienpq.domain.port.external.JsonSerializerPort;
 import dienpq.domain.port.repository.ProductRepositoryPort;
 import java.util.Map;
+import java.math.BigDecimal;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -18,16 +19,16 @@ public class DashboardAndReportServiceImpl implements DashboardAndReportService 
     @Override
     public DashboardSummary getDashboardSummary() {
         long totalProducts = productRepositoryPort.countTotal();
-        double totalInventoryValue = productRepositoryPort.sumTotalInventoryValue();
-        long lowStockCount = productRepositoryPort.countLowStock(10);
+        BigDecimal totalInventoryValue = productRepositoryPort.sumTotalInventoryValue();
+        long lowStockCount = productRepositoryPort.countLowStock(10);// Sản phẩm sắp hết hàng
         long outOfStockCount = productRepositoryPort.countOutOfStock();
-        List<Product> lowStockProducts = productRepositoryPort.findBySoLuongLessThan(10);
-
+        // List<Product> lowStockProducts =
+        // productRepositoryPort.findBySoLuongLessThan(10);
+        List<Product> lowStockProducts = productRepositoryPort.findBySoLuongBetween(0, 9);
         Map<String, Long> brandStats = productRepositoryPort.getCountByBrand();
         String brandStatsJson = jsonSerializerPort.toJson(brandStats);
 
         return new DashboardSummary(totalProducts, totalInventoryValue, lowStockCount,
                 outOfStockCount, lowStockProducts, brandStatsJson);
     }
-
 }

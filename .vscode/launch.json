@@ -27,6 +27,13 @@
             "request": "launch",
             "mainClass": "products.DemoApplication",
             "projectName": "products"
+        },
+        {
+            "type": "java",
+            "name": "Attach to API Container (Port 5006)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5006
         }
     ]
 }

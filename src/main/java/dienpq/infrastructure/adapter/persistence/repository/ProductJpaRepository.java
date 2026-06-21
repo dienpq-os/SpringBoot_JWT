@@ -7,9 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import dienpq.infrastructure.adapter.persistence.entity.ProductEntity;
-
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -28,10 +27,10 @@ public interface ProductJpaRepository extends JpaRepository<ProductEntity, Strin
                                         "LOWER(p.hangSanXuat) LIKE LOWER(CONCAT('%', :keyword, '%'))")
         Page<ProductEntity> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-        // --- Tối ưu thống kê Dashboard ---
+        // --- Thống kê Dashboard ---
 
         @Query("SELECT SUM(p.giaBan * p.soLuong) FROM ProductEntity p")
-        Double sumTotalInventoryValue();
+        BigDecimal sumTotalInventoryValue();
 
         // 2. Dùng Interface Projection để đếm số lượng sản phẩm theo hãng,
         // tránh phải load toàn bộ entity vào RAM
@@ -39,7 +38,7 @@ public interface ProductJpaRepository extends JpaRepository<ProductEntity, Strin
         List<BrandCountProjection> countProductsByBrand();
 
         // Đếm số lượng sản phẩm có số lượng thấp (ví dụ: soLuong < 5)
-        @Query("SELECT COUNT(p) FROM ProductEntity p WHERE p.soLuong < :threshold")
+        @Query("SELECT COUNT(p) FROM ProductEntity p WHERE p.soLuong > 0 AND p.soLuong < :threshold")
         long countLowStock(@Param("threshold") int threshold);
 
         // Đếm số lượng sản phẩm hết hàng (soLuong = 0)
@@ -50,6 +49,9 @@ public interface ProductJpaRepository extends JpaRepository<ProductEntity, Strin
         // tránh N+1 khi load ảnh (images) liên quan
         @EntityGraph(attributePaths = { "images" })
         List<ProductEntity> findBySoLuongLessThan(int threshold);
+
+        @EntityGraph(attributePaths = { "images" })
+        List<ProductEntity> findBySoLuongBetween(Integer start, Integer end);
 
         // Định nghĩa cấu trúc DTO ảo phục vụ cho hàm thống kê hãng
         interface BrandCountProjection {

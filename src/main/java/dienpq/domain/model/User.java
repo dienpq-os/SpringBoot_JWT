@@ -48,8 +48,8 @@ public class User {
         this.username = username;
         this.email = email;
 
-        // Không được phép tự ý tước quyền ADMIN cuối cùng (Logic này có thể nâng cấp
-        // thêm)
+        // Không được phép tự ý tước quyền ADMIN cuối cùng
+        // (Logic này có thể nâng cấp thêm)
         if ("ADMIN".equals(this.role) && !"ADMIN".equals(role)) {
             throw new IllegalStateException("Không thể hạ quyền của tài khoản Admin hệ thống!");
         }

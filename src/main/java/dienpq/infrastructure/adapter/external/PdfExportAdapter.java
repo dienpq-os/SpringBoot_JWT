@@ -12,10 +12,8 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 
-import dienpq.application.dto.ProductDTO;
 import dienpq.domain.model.Product;
 import dienpq.domain.port.external.PDFServicePort;
-import dienpq.presentation.dto.ProductResponse;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -37,7 +35,7 @@ public class PdfExportAdapter implements PDFServicePort {
     }
 
     @Override
-    public void exportLowStockReport(List<ProductResponse> products, OutputStream outputStream) {
+    public void exportLowStockReport(List<Product> products, OutputStream outputStream) {
         try {
             Resource resource = resourceLoader.getResource("classpath:static/fonts/arial.ttf");
             PdfFont vietnameseFont;
@@ -72,7 +70,7 @@ public class PdfExportAdapter implements PDFServicePort {
             table.addHeaderCell(new Cell().add(new Paragraph("Số lượng").setBold()));
 
             if (products != null && !products.isEmpty()) {
-                for (ProductResponse p : products) {
+                for (Product p : products) {
                     table.addCell(new Cell().add(new Paragraph(p.getMaSP())));
                     table.addCell(new Cell().add(new Paragraph(p.getTenModel())));
                     table.addCell(new Cell().add(new Paragraph(p.getHangSanXuat())));

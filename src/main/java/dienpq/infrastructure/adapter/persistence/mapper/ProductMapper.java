@@ -23,10 +23,10 @@ public interface ProductMapper {
     // MapStruct tự động dùng Product.builder() để dựng đối tượng vô cùng an toàn
     Product toDomain(ProductEntity entity);
 
-    // ĐÃ SỬA: Sử dụng thuộc tính 'main' từ ProductImageEntity map vào trường
-    // 'isMain' của Domain Builder
-    // Lưu ý: MapStruct sẽ tự tìm phương thức .isMain() trên Builder của
-    // ProductImage
+    // Sử dụng thuộc tính 'main' từ ProductImageEntity
+    // map vào trường 'isMain' của Domain Builder
+    // Lưu ý: MapStruct sẽ tự tìm phương thức .isMain()
+    // trên Builder của ProductImage
     @Mapping(target = "id", source = "id")
     @Mapping(target = "imageUrl", source = "imageUrl")
     @Mapping(target = "isMain", source = "main")
@@ -36,12 +36,12 @@ public interface ProductMapper {
     @Mapping(target = "images", ignore = true) // Bỏ qua để xử lý AfterMapping thủ công thiết lập khóa ngoại
     ProductEntity toEntity(Product domain);
 
-    // ĐÃ SỬA: Map từ trường 'isMain' của Domain Model sang trường 'main' của JPA
-    // Entity
+    // Map từ trường 'isMain' của Domain Model sang trường 'main' của JPA Entity
     @Mapping(target = "id", source = "id")
     @Mapping(target = "imageUrl", source = "imageUrl")
-    @Mapping(target = "isMain", source = "main") // Đồng bộ trường 'isMain' (Lombok sinh getter là isMain()) sang 'main'
-                                                 // của Entity
+    // Đồng bộ trường 'isMain' (Lombok sinh getter là isMain())
+    // sang 'main' của Entity
+    @Mapping(target = "isMain", source = "main")
     @Mapping(target = "product", ignore = true)
     ProductImageEntity toEntityImage(ProductImage domainImage);
 
@@ -67,8 +67,7 @@ public interface ProductMapper {
     }
 
     // 4. CHUYỂN ĐỔI: Domain Model -> DTO
-    // ĐÃ TỐI ƯU: Không dùng ignore nữa! Tận dụng trực tiếp 2 hàm getter tính toán
-    // của Domain mới
+    // Tận dụng trực tiếp 2 hàm getter tính toán của Domain mới
     // MapStruct sẽ tự động gọi product.getAllImageUrls() map vào DTO.imageUrls
     // và product.getMainImageUrl() map vào DTO.mainImageUrl
     @Mapping(target = "imageUrls", source = "allImageUrls")

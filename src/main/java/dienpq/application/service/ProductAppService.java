@@ -4,6 +4,8 @@ import dienpq.application.dto.ProductDTO;
 import dienpq.domain.model.DomainFile;
 import dienpq.domain.model.PagedResult;
 import dienpq.domain.model.Product;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductAppService {
@@ -12,7 +14,7 @@ public interface ProductAppService {
     public PagedResult<Product> listPagedResult(String keyword, int page, int size);
 
     // Lấy tổng giá trị tồn kho phục vụ hiển thị nhanh trên trang danh sách
-    public double getInventoryValue();
+    public BigDecimal getInventoryValue();
 
     public Product getProductById(String maSP);
 

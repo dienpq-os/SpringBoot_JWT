@@ -1,12 +1,16 @@
 package dienpq.application.service;
 
+import dienpq.application.dto.LoginRequest;
+import dienpq.application.dto.LoginResponse;
 import dienpq.application.dto.UserDTO;
 import dienpq.application.utils.ResourceRollbackHook;
 import dienpq.domain.model.DomainFile;
+import dienpq.domain.model.JwtToken;
 import dienpq.domain.model.User;
 import dienpq.domain.port.external.EmailServicePort;
 import dienpq.domain.port.external.FileServicePort;
 import dienpq.domain.port.external.PasswordServicePort;
+import dienpq.domain.port.external.TokenServicePort;
 import dienpq.domain.port.external.UserLoggerPort;
 import dienpq.domain.port.repository.UserRepositoryPort;
 
@@ -23,6 +27,44 @@ public class UserAppServiceImpl implements UserAppService {
     private final PasswordServicePort passwordServicePort;
     private final EmailServicePort emailServicePort;
     private final UserLoggerPort userLoggerPort;
+    private final TokenServicePort tokenServicePort;
+
+    @Override
+    public LoginResponse login(LoginRequest request) {
+        // 1. Phục hồi dữ liệu an toàn phòng trường hợp Frontend gửi sai tên thuộc tính
+        // DTO
+        String identity = request.getUsername();
+
+        // Nếu biến identity bị null, hệ thống ném lỗi tường minh ngay tại đây
+        // thay vì đẩy xuống tầng DB sinh câu lệnh SQL lỗi "IS NULL"
+        if (identity == null || identity.trim().isEmpty()) {
+            throw new RuntimeException(
+                    "Dữ liệu đăng nhập (Email/Username) gửi lên bị rỗng. Hãy kiểm tra lại tên thuộc tính JSON từ Frontend!");
+        }
+
+        // 2. Tìm kiếm user từ DB thông qua Port kép
+        User user = userRepositoryPort.findByEmailOrUsername(identity, identity)
+                .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không chính xác"));
+
+        // 3. Kiểm tra mật khẩu thông qua Password Port
+        if (!passwordServicePort.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Email hoặc mật khẩu không chính xác");
+        }
+
+        // 4. Sinh mã JWT Token
+        JwtToken jwtToken = tokenServicePort.generateToken(user);
+
+        UserDTO dto = UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .imageUrl(user.getImageUrl())
+                .build();
+
+        LoginResponse response = new LoginResponse(jwtToken, dto);
+        return response;
+    }
 
     @Override
     public void changePassword(String usernameOrEmail, String oldPassword, String newPassword, String confirmPassword) {

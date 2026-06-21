@@ -2,6 +2,8 @@ package dienpq.domain.port.repository;
 
 import dienpq.domain.model.Product;
 import dienpq.domain.model.PagedResult;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
@@ -23,7 +25,7 @@ public interface ProductRepositoryPort {
 
     // CÁC HÀM THỐNG KÊ SỬ DỤNG CHO DASHBOARD
     // 1. Tính tổng giá trị tồn kho
-    Double sumTotalInventoryValue();
+    BigDecimal sumTotalInventoryValue();
 
     // 2. Đếm sản phẩm sắp hết hàng
     long countLowStock(int threshold);
@@ -33,6 +35,8 @@ public interface ProductRepositoryPort {
 
     // 4. Lấy danh sách sản phẩm tồn kho thấp
     List<Product> findBySoLuongLessThan(int threshold);
+
+    List<Product> findBySoLuongBetween(Integer start, Integer end);
 
     // 5. Khai báo cổng lấy dữ liệu thống kê số lượng sản phẩm theo hãng
     Map<String, Long> getCountByBrand();

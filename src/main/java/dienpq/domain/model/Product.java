@@ -16,8 +16,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Product {
 
-    // Chuyển Setter sang Private hoặc loại bỏ hoàn toàn để bảo vệ tính toàn vẹn dữ
-    // liệu
     private String maSP;
     private String tenModel;
     private String hangSanXuat;
@@ -36,8 +34,8 @@ public class Product {
         this.soLuong = soLuong;
     }
 
-    // Đóng gói danh sách ảnh, không cho phép bên ngoài dùng .getImages().add() bừa
-    // bãi
+    // Đóng gói danh sách ảnh,
+    // không cho phép bên ngoài dùng .getImages().add() bừa bãi
     public List<ProductImage> getImages() {
         if (this.images == null)
             return new ArrayList<>();
@@ -114,8 +112,8 @@ public class Product {
                         }
                     }
                 } catch (NumberFormatException e) {
-                    // Không dùng System.err, ném exception rõ nghĩa để UseCase bắt hoặc
-                    // GlobalHandler xử lý
+                    // Không dùng System.err,
+                    // ném exception rõ nghĩa để UseCase bắt hoặc GlobalHandler xử lý
                     throw new IllegalArgumentException("Định dạng chỉ mục ảnh mới 'new_' không hợp lệ!", e);
                 }
             } else {
@@ -154,7 +152,6 @@ public class Product {
         return this.images.stream().map(ProductImage::getImageUrl).toList();
     }
 
-    // ĐÃ TỐI ƯU: Loại bỏ chuỗi "/images/products/default.png".
     // Trả về chuỗi rỗng hoặc null, việc hiển thị ảnh mặc định là trách nhiệm của
     // tầng Presentation (Thẻ <img> của HTML hoặc logic xử lý DTO Web).
     public String getMainImageUrl() {
